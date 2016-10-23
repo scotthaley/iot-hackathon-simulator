@@ -1,3 +1,4 @@
+var simulator = require('./simulator');
 'use strict';
 
 var clientFromConnectionString = require('azure-iot-device-amqp').clientFromConnectionString;
@@ -15,11 +16,6 @@ function printResultFor(op) {
     // if (res) console.log(op + ' status: ' + res.constructor.name);
   };
 }
-
-var addresses = [
-  "00:0C:29:9C:B3:33",
-  "00:1B:63:84:45:E6",
-  "E8:11:32:4E:07:DB"];
 
 var nodes = [
     {x: 5.5, y: 2.5, id: 'node 1', range: 4},
@@ -72,10 +68,6 @@ function updateWifiDevices() {
     }
 }
 
-function randomAddress() {
-  return addresses[Math.floor(Math.random()*addresses.length)];
-}
-
 function payloadForNode(node) {
     var payload = {date: new Date().toJSON(), hits: []};
     for (var i in wifiDevices) {
@@ -89,40 +81,23 @@ function payloadForNode(node) {
     return payload;
 }
 
-function randomPayload() {
-    var payload = {date: new Date().toJSON(), hits: []};
-    var hitCount = 20 * Math.random();
-    for (var i = 0; i < hitCount; i ++) {
-        var strength = Math.round(-100 * Math.random());
-        payload.hits.push(strength);
-    }
-    return payload;
-}
-
 var connectCallback = function (err) {
-  if (err) {
-    console.log('Could not connect: ' + err);
-  } else {
-    console.log('Client connected');
+    if (err) {
+        console.log('Could not connect: ' + err);
+    } else {
+        console.log('Client connected');
 
-    // Create a message and send it to the IoT Hub every second
-    setInterval(function(){
-      var address = randomAddress();
-      var date = new Date().toJSON();
-      var payload = [];
-      for (var i in nodes) {
-          payload.push({ deviceId: nodes[i].id, payload: payloadForNode(nodes[i])});
-      }
-      var data = JSON.stringify(payload);
-      var message = new Message(data);
-    //   console.log("Sending message: " + message.getData());
-      client.sendEvent(message, printResultFor('send'));
-      }, 100);
+        // Create a message and send it to the IoT Hub every second
+        setInterval(function(){
+            var payload = simulator.payload();
+            var data = JSON.stringify(payload);
+            var message = new Message(data);
+            console.log("Sending message: " + message.getData());
+            //   client.sendEvent(message, printResultFor('send'));
+        }, 1000);
 
-    setInterval(function() {
-        updateWifiDevices();
-    }, 10);
-  }
+    }
 };
 
+simulator.beginSimulation();
 client.open(connectCallback);
