@@ -14,13 +14,20 @@ module.exports = (function() {
     ];
 
     var people = [
-        {x: 9, y: 2.5, step: 0, path: [
+        {x: 9, y: 2.5, path: [
         	{x: 7, y: 2.5}, {x: 7, y: -6}, {x: -8, y: -6}, {x: -8, y: 6}
         ]}
     ]
 
     function randomPerson() {
-        return people[Math.floor(Math.random() * people.length)];
+        var master = people[Math.floor(Math.random() * people.length)];
+        var newPerson = {
+            x: master.x,
+            y: master.y,
+            step: 0,
+            path: master.path
+        }
+        return newPerson;
     }
 
     function createPerson() {
@@ -33,35 +40,43 @@ module.exports = (function() {
     function updateWifiDevices() {
         var toRemove = [];
         for (var i in wifiDevices) {
-            var wd = wifiDevices[i];
-            var isAtPoint = 0;
-            var nextPoint = wd.path[wd.step];
-            if (nextPoint) {
-                if (wd.x < nextPoint.x - 0.05) {
-                    wd.x += 0.01;
-                } else if (wd.x > nextPoint.x + 0.05) {
-                    wd.x -= 0.01;
-                } else {
-                    isAtPoint ++;
-                }
-                if (wd.y < nextPoint.y - 0.05) {
-                    wd.y += 0.01;
-                } else if (wd.y > nextPoint.y + 0.05) {
-                    wd.y -= 0.01;
-                } else {
-                    isAtPoint ++;
-                }
-
-                if (isAtPoint == 2) {
-                    wd.step ++;
-                }
-            } else {
-                toRemove.push[i];
+            var toR = updateSingleDevice(i);
+            if (toR) {
+                toRemove.push(i);
             }
         }
         for (var a in toRemove) {
             wifiDevices.splice(toRemove[a], 1);
         }
+    }
+
+    function updateSingleDevice(index) {
+        var wd = wifiDevices[index];
+        var isAtPoint = 0;
+        var nextPoint = wd.path[wd.step];
+        if (nextPoint) {
+            if (wd.x < nextPoint.x - 0.05) {
+                wd.x += 0.01;
+            } else if (wd.x > nextPoint.x + 0.05) {
+                wd.x -= 0.01;
+            } else {
+                isAtPoint ++;
+            }
+            if (wd.y < nextPoint.y - 0.05) {
+                wd.y += 0.01;
+            } else if (wd.y > nextPoint.y + 0.05) {
+                wd.y -= 0.01;
+            } else {
+                isAtPoint ++;
+            }
+
+            if (isAtPoint == 2) {
+                wd.step ++;
+            }
+        } else {
+            return index;
+        }
+        return null;
     }
 
     function payloadForNode(node) {
@@ -82,11 +97,11 @@ module.exports = (function() {
             updateWifiDevices();
         }, 10);
 
-        createPerson();
+        // createPerson();
 
-        // setInterval(function() {
-        //     createPerson();
-        // }, 100);
+        setInterval(function() {
+            createPerson();
+        }, 5000);
     }
 
     function payload() {
