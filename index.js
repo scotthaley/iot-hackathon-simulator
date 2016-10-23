@@ -92,8 +92,8 @@ var connectCallback = function (err) {
             var payload = simulator.payload();
             var data = JSON.stringify(payload);
             var message = new Message(data);
-            console.log("Sending message: " + message.getData());
-            //   client.sendEvent(message, printResultFor('send'));
+            // console.log("Sending message: " + message.getData());
+              client.sendEvent(message, printResultFor('send'));
         }, 1000);
 
     }
